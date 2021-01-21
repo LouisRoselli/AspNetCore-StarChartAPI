@@ -19,5 +19,76 @@ namespace StarChart.Controllers
         {
             _context = context;
         }
+
+        [HttpGet("{id:int}")]
+        public IActionResult GetById(int id)
+        {
+            try
+            {
+                var CelestailObject = _context.CelestialObjects.Where(x => x.Id == id).SingleOrDefault();
+                if(CelestailObject == null)
+                {
+                    return NotFound();
+                }
+
+                var OrbitedObjects = _context.CelestialObjects.Where(x => x.OrbitedObjectId == CelestailObject.Id).ToList();
+                CelestailObject.Satellites.AddRange(OrbitedObjects);
+
+                return Ok(CelestailObject);
+
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet("{name}")]
+        public IActionResult GetByName(string name)
+        {
+            try
+            {
+                var CelestailObjects = _context.CelestialObjects.Where(x => x.Name == name).ToList();
+                if (CelestailObjects.Count == 0)
+                {
+                    return NotFound();
+                }
+
+                foreach(var CelestailObject in CelestailObjects)
+                {
+                    var OrbitedObjects = _context.CelestialObjects.Where(x => x.OrbitedObjectId == CelestailObject.Id).ToList();
+                    CelestailObject.Satellites.AddRange(OrbitedObjects);
+                }
+
+                return Ok(CelestailObjects);
+
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpGet]
+        public IActionResult GetAll()
+        {
+            try
+            {
+                var CelestailObjects = _context.CelestialObjects.ToList();
+
+                foreach (var CelestailObject in CelestailObjects)
+                {
+                    var OrbitedObjects = _context.CelestialObjects.Where(x => x.OrbitedObjectId == CelestailObject.Id).ToList();
+                    CelestailObject.Satellites.AddRange(OrbitedObjects);
+                }
+
+                return Ok(CelestailObjects);
+
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
     }
 }
